@@ -8,7 +8,7 @@ document.body.appendChild(app.view);
 
 
 const sprite = Sprite.from(Texture.WHITE);
-sprite.tint = 0xff0000;
+sprite.tint = 0xffff00;
 
 app.stage.addChild(sprite);
 

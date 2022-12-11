@@ -2,6 +2,7 @@ import type { RollupOptions } from 'rollup';
 import copy from 'rollup-plugin-copy';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import serve from 'rollup-plugin-serve';
 
 const config: RollupOptions = {
   input: 'src/main.ts',
@@ -20,6 +21,10 @@ const config: RollupOptions = {
       preferBuiltins: false,
     }),
     commonjs(),
+    serve({
+      open: true,
+      contentBase: 'build',
+    })
   ]
   // sourceMap: 'inline',
 }
