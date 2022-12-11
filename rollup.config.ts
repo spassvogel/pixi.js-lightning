@@ -1,14 +1,26 @@
 import type { RollupOptions } from 'rollup';
+import copy from 'rollup-plugin-copy';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 
 const config: RollupOptions = {
-  // entry: 'src/scripts/main.js',
-  // dest: 'build/js/main.min.js',
-  // format: 'iife',
   input: 'src/main.ts',
   output: {
     file: 'build/bundle.js',
-    format: 'cjs'
+    // format: 'commonjs'
+    format: 'iife'
   },
+  plugins: [
+    copy({
+      targets: [
+        { src: 'public/**', dest: 'build' },
+      ]
+    }),
+    resolve({
+      preferBuiltins: false,
+    }),
+    commonjs(),
+  ]
   // sourceMap: 'inline',
 }
 export default config;
