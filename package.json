@@ -16,9 +16,11 @@
     "typescript": "^4.9.4"
   },
   "dependencies": {
+    "@pixi/filter-glow": "^5.0.0",
     "@rollup/plugin-commonjs": "^23.0.4",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "pixi.js": "^7.0.4",
-    "rollup-plugin-serve": "^2.0.2"
+    "rollup-plugin-serve": "^2.0.2",
+    "simplex-noise": "^4.0.1"
   }
 }

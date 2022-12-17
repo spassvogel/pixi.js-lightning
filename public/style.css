@@ -2,3 +2,28 @@ body {
   margin: 0;
   padding: 0;
 }
+
+.form-slider-update {
+  position: absolute;
+  bottom: 2rem;
+  left: 0rem;
+}
+
+.form-slider-amplitude {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+}
+
+.form-slider-thickness {
+  position: absolute;
+  bottom: 2rem;
+  left: 12rem;
+}
+
+.form-slider-speed {
+  position: absolute;
+  bottom: 2rem;
+  left: 22rem;
+}
+
