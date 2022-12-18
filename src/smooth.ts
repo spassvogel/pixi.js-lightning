@@ -21,4 +21,6 @@ const average = (data: number[]) => {
   return avg;
 }
 
-smooth(array, 0.85);
+// smooth(array, 0.85);
+
+export default smooth

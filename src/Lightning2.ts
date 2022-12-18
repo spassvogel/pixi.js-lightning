@@ -1,46 +1,55 @@
 import { GlowFilter } from "@pixi/filter-glow";
-import { Container, Graphics, LINE_CAP } from "pixi.js";
+import { lerp } from "lerp";
+import LightningFadeType from "LightningFadeType";
+import { Container, Graphics, LINE_CAP, Point, Sprite, Texture } from "pixi.js";
 import { createNoise2D, NoiseFunction2D } from 'simplex-noise';
+import smooth from 'array-smooth';
 
 class Lightning2 extends Graphics {
   private holder: Graphics = new Graphics();
 
-  private _steps = 142;
+  private _steps = 40;
   private _color: number;
+  private _smooth = 0.85;
   private _generation: number;
   private _noise: NoiseFunction2D;
+  private _smoothNoise: NoiseFunction2D;
   private _increment = 0;
-  private _thickness: number;
+  private _smoothIncrement = 0;
+  private _thicknessStart: number;
+  private _thicknessEnd: number;
   private _amplitude = 0.02;
   private _speed: number = 1;
+  private _smoothSpeed: number = 0.1;
 
-  public startX = 50;
-  public startY = 200;
-  public endX = 900;
-  public endY = 200;
+  private _start = new Point(50, 200);
+  private _end = new Point(900, 200);
 
-  constructor(color: number = 0xffffff, pthickness: number = 6, generation: number = 0) {
+  public alphaFadeType: LightningFadeType = LightningFadeType.GENERATION;
+
+
+  constructor(color: number = 0xffffff, thicknessStart: number = 6, generation: number = 0) {
     super();
     this._color = color;
     this._noise = createNoise2D();
-    this._thickness = pthickness;
+    this._smoothNoise = createNoise2D();
+    this._thicknessStart = thicknessStart;
+    this._thicknessEnd = thicknessStart;
 
     // this.alphaFadeType = LightningFadeType.GENERATION;
     // this.thicknessFadeType = LightningFadeType.NONE;
-    // this.holder.tint = 0xFFFFFF * Math.random();
-    // console.log(noise(10, 10));
     this._generation = generation;
     if (generation == 0) {
+      this.filters = [
+        new GlowFilter({ distance: 15, outerStrength: 3 })
+      ]
       this.init();
     }
 
-    this.filters = [
-      new GlowFilter({ distance: 15, outerStrength: 2 })
-    ]
   }
 
   private init() {
-    // this.holder.lineTo(this.endX, this.endY);
+    // this.holder.lineTo(this.end.x, this.end.y);
 
     // this.holder.set = 'Lightning holder';
     this.addChild(this.holder);
@@ -49,6 +58,7 @@ class Lightning2 extends Graphics {
 
   public update(): void {
     this._increment += this.speed / 20;
+    this._smoothIncrement += this.smoothSpeed / 20;
     // console.log(`increment`, this._increment);
     this.draw();
     // this.draw()
@@ -63,33 +73,50 @@ class Lightning2 extends Graphics {
 
   public draw(): void {
     this.clear();
-    this.beginFill(0xff0000);
-    this.drawCircle(this.endX, this.endY, 15)
-    this.endFill();
 
-    this.lineStyle({
-      width: this.thickness,
-      color: this.color,
-      cap: LINE_CAP.ROUND
-    });
-    const angle = Math.atan2(this.endY - this.startY, this.endX - this.startX);
+    const angle = Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
 
-    let prevX = this.startX;
-    let prevY = this.startY;
+    let prevX = this.start.x;
+    let prevY = this.start.y;
 
     const segmentLength = this.length / (this.steps - 1);
 
     this.moveTo(prevX, prevY)
     // console.log(`segmentLength`,s segmentLength);
-    const dx = this.endX - this.startX;
-    const dy = this.endY - this.startY;
+    const dx = this.end.x - this.start.x;
+    const dy = this.end.y - this.start.y;
 
+    const color = this.color;
+    let smoothNoise: number[] = [];
+
+    if (this.smooth > 0) {
+      const rough = [...Array(this.steps).keys()].map((_, i) => {
+        return this._smoothNoise(i, this._smoothIncrement)
+      })
+      smoothNoise = smooth(rough, 3);
+    }
     for (let i: number = 0; i < this.steps - 1; i++) {
       const noise = this._noise(i, this._increment);
-      // const angle2 = angle + noise * (Math.PI / 2)
 
-      const targetX = this.startX + dx / (this.steps - 1) * (i + 1);
-      const targetY = this.startY + dy / (this.steps - 1) * (i + 1);
+      const currentPosition: number = 1 / this.steps * (this.steps - i);
+      let alpha = this.alpha;
+      const width = (this.thicknessStart - this.thicknessEnd) * ((this.steps - i) / this.steps) + this.thicknessEnd;
+
+      if (this.alphaFadeType == LightningFadeType.TIP_TO_END) {
+        // alpha = -this._minThickness * ((this.steps - i) / this.steps) + this._minThickness;
+      }
+      // console.log(i, alpha)
+      // console.log(currentPosition, ((this.steps - i) / this.steps))
+      this.lineStyle({
+        width,
+        color,
+        alpha,
+        cap: LINE_CAP.ROUND
+      });
+
+
+      const targetX = this.start.x + dx / (this.steps - 1) * (i + 1);
+      const targetY = this.start.y + dy / (this.steps - 1) * (i + 1);
       let targetWithOffsetX = targetX;// * (1 - this.smooth);
       let targetWithOffsetY = targetY ; // * (1 - this.smooth);
 
@@ -98,8 +125,19 @@ class Lightning2 extends Graphics {
         const offsetX = Math.sin(angle) * offset
         const offsetY = Math.cos(angle) * offset
 
-        targetWithOffsetX = targetX + offsetX;// * (1 - this.smooth);
-        targetWithOffsetY = targetY - offsetY; // * (1 - this.smooth);
+        let smoothX = 0;
+        let smoothY = 0;
+
+        if (this.smooth > 0) {
+          const smoothOffset = smoothNoise[i] * this.length * (1 - this.smooth)
+          smoothX = Math.sin(angle) * smoothOffset
+          smoothY = Math.cos(angle) * smoothOffset
+        }
+// console.log(`smoothOffset`, smoothOffset);
+        // targetWithOffsetX = targetX + offsetX;// * (1 - this.smooth);
+        // targetWithOffsetY = targetY - offsetY; // * (1 - this.smooth);
+        targetWithOffsetX = targetX + offsetX + smoothX;// * (1 - this.smooth);
+        targetWithOffsetY = targetY - offsetY - smoothY; // * (1 - this.smooth);
       }
       this.lineTo(targetWithOffsetX, targetWithOffsetY);
 
@@ -109,7 +147,7 @@ class Lightning2 extends Graphics {
       // prevX = targetX;
       // prevY = targetY;
     }
-    // this.lineTo(this.endX, this.endY);
+    // this.lineTo(this.end.x, this.end.y);
 
 // begin a green fill..
     /*this.holder.beginFill(0x00FF00);*/
@@ -120,8 +158,49 @@ class Lightning2 extends Graphics {
 
   }
 
+  private updateAlphaMap() {
+    // const canvas = document.createElement('canvas');
+    // canvas.width = this.length + this.start.x;
+    // canvas.height = this.length + this.start.y;
+
+    // const ctx = canvas.getContext('2d');
+
+    // if (ctx) {
+
+    // const gradient = ctx?.createRadialGradient(0, 0, 1, 0, 0, (this.length + this.start.x) * 2);
+    // // var gradient = self.ctx.createRadialGradient(center.x, center.y, 1, center.x, center.y, 600);
+    // gradient?.addColorStop(0, "white");
+    // gradient?.addColorStop(1, "black");
+
+    // ctx.fillStyle = gradient;
+    // ctx.fillRect(0, 0, this.length, this.length);
+
+    //   var texture = Texture.from(canvas)
+    //   const sprite = Sprite.from(texture);
+    //   this.mask = sprite
+    // }
+  }
+
   public get color(): number {
     return this._color;
+  }
+
+  public get start() {
+    return this._start;
+  }
+
+  public set start(value: Point) {
+    this._start = value;
+    this.updateAlphaMap()
+  }
+
+  public get end() {
+    return this._end;
+  }
+
+  public set end(value: Point) {
+    this._end = value;
+    this.updateAlphaMap()
   }
 
   public set steps(arg: number) {
@@ -137,25 +216,34 @@ class Lightning2 extends Graphics {
   }
 
   public get length(): number {
-    const dX = this.endX - this.startX;
-    const dY = this.endY - this.startY;
+    const dX = this.end.x - this.start.x;
+    const dY = this.end.y - this.start.y;
     return Math.sqrt(dX * dX + dY * dY);
   }
 
-  public set thickness(arg: number) {
+  public set thicknessStart(arg: number) {
     if (arg < 0) arg = 0;
-    this._thickness = arg;
+    this._thicknessStart = arg;
   }
 
-  public get thickness(): number {
-    return this._thickness;
+  public get thicknessStart(): number {
+    return this._thicknessStart;
+  }
+
+  public set thicknessEnd(arg: number) {
+    if (arg < 0) arg = 0;
+    this._thicknessEnd = arg;
+  }
+
+  public get thicknessEnd() {
+    return this._thicknessEnd;
   }
 
   public set amplitude(arg: number) {
     this._amplitude = arg;
   }
 
-  public get amplitude(): number {
+  public get amplitude() {
     return this._amplitude;
   }
 
@@ -170,12 +258,28 @@ class Lightning2 extends Graphics {
     return this._speed;
   }
 
-  // // Sets a value for smoothness. 1 = smooth, 0 is rough
-  // public set smooth(arg: number) {
-  //   if (arg < 0) arg = 0;
-  //   if (arg > 1) arg = 1;
-  //   this._smooth = arg;
-  // }
+  // Sets the speed of the smoothed wave
+  public set smoothSpeed(arg: number) {
+    this._smoothSpeed = arg;
+    // this.childrenArray.forEach((o) => {
+    //   o.instance.speed = arg;
+    // })
+  }
+
+  public get smoothSpeed(): number {
+    return this._smoothSpeed;
+  }
+
+  // Sets a value for smoothness. 1 = smooth, 0 is rough
+  public set smooth(arg: number) {
+    if (arg < 0) arg = 0;
+    if (arg > 1) arg = 1;
+    this._smooth = arg;
+  }
+
+  public get smooth() {
+    return this._smooth;
+  }
 }
 
 export default Lightning2
