@@ -11,10 +11,31 @@
   <div class="controls-container">
     <div class="control control-checkbox">
       <label for="frmUpdate">Update</label>
-      <input type="checkbox" id="frmUpdate" checked/>
+      <input type="checkbox" id="frmUpdate" checked> Update lightning
     </div>
     <div class="control control-slider">
-
+      <label for="frmAmplitude">Amplitude</label>
+      <input type="range" id="frmAmplitude" min="0" max="1" step="0.01" >
+    </div>
+    <div class="control control-slider">
+      <label for="frmThicknessStart">Thickness start</label>
+      <input type="range" id="frmThicknessStart" min="0" max="10" step="0.01" >
+    </div>
+    <div class="control control-slider">
+      <label for="frmThicknessEnd">Thickness end</label>
+      <input type="range" id="frmThicknessEnd" min="0" max="10" step="0.01" >
+    </div>
+    <div class="control control-slider">
+      <label for="frmSpeed">Speed</label>
+      <input type="range" id="frmSpeed" min="0" max="5" step="0.01" >
+    </div>
+    <div class="control control-slider">
+      <label for="frmSmooth">Smooth</label>
+      <input type="range" id="frmSmooth" min="0" max="1" step="0.001" >
+    </div>
+    <div class="control control-slider">
+      <label for="frmSmoothSpeed">Smooth speed</label>
+      <input type="range" id="frmSmoothSpeed" min="0" max="10" step="0.001" >
     </div>
   </div>
   <script src="bundle.js"></script>

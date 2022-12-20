@@ -41,7 +41,7 @@ class Lightning2 extends Graphics {
     this._generation = generation;
     if (generation == 0) {
       this.filters = [
-        new GlowFilter({ distance: 15, outerStrength: 3 })
+        new GlowFilter({ distance: 15, outerStrength: 3, color: 0x0000ff })
       ]
       this.init();
     }
@@ -57,8 +57,8 @@ class Lightning2 extends Graphics {
   }
 
   public update(): void {
-    this._increment += this.speed / 20;
-    this._smoothIncrement += this.smoothSpeed / 20;
+    this._increment += this.speed / 40;
+    // this._smoothIncrement += this.smoothSpeed / 40;
     // console.log(`increment`, this._increment);
     this.draw();
     // this.draw()
@@ -89,12 +89,10 @@ class Lightning2 extends Graphics {
     const color = this.color;
     let smoothNoise: number[] = [];
 
-    if (this.smooth > 0) {
-      const rough = [...Array(this.steps).keys()].map((_, i) => {
-        return this._smoothNoise(i, this._smoothIncrement)
-      })
-      smoothNoise = smooth(rough, 3);
-    }
+    const rough = [...Array(this.steps).keys()].map((_, i) => {
+      return this._smoothNoise(i, this._increment)
+    })
+    smoothNoise = smooth(rough, 3);
     for (let i: number = 0; i < this.steps - 1; i++) {
       const noise = this._noise(i, this._increment);
 
@@ -127,12 +125,9 @@ class Lightning2 extends Graphics {
 
         let smoothX = 0;
         let smoothY = 0;
-
-        if (this.smooth > 0) {
-          const smoothOffset = smoothNoise[i] * this.length * (1 - this.smooth)
-          smoothX = Math.sin(angle) * smoothOffset
-          smoothY = Math.cos(angle) * smoothOffset
-        }
+        const smoothOffset = smoothNoise[i] * (this.length ) * (1 - this.smooth)
+        smoothX = Math.sin(angle) * smoothOffset
+        smoothY = Math.cos(angle) * smoothOffset
 // console.log(`smoothOffset`, smoothOffset);
         // targetWithOffsetX = targetX + offsetX;// * (1 - this.smooth);
         // targetWithOffsetY = targetY - offsetY; // * (1 - this.smooth);
