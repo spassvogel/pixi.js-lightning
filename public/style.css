@@ -9,7 +9,7 @@ body {
   bottom: 2rem;
   left: 2rem;
   right: 2rem;
-  background: purple;
+  background: #303030;
   display: flex;
   flex-wrap: wrap;
   gap: 2rem;

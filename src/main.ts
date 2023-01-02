@@ -110,20 +110,24 @@ app.ticker.add(delta => {
   // lightning.update();
   type WritableProps = Pick<Lightning2,
     'amplitude'
+  | 'steps'
   | 'thicknessStart'
   | 'thicknessEnd'
   | 'speed'
   | 'smooth'
   | 'smoothSpeed'
+  | 'waveLength'
   >
 
   const checkboxUpdate = document.querySelector<HTMLFormElement>('#frmUpdate')!;
   setupSlider('#frmAmplitude', 'amplitude')
+  setupSlider('#frmSteps', 'steps')
   setupSlider('#frmThicknessStart', 'thicknessStart')
   setupSlider('#frmThicknessEnd', 'thicknessEnd')
   setupSlider('#frmSpeed', 'speed')
   setupSlider('#frmSmooth', 'smooth')
   setupSlider('#frmSmoothSpeed', 'smoothSpeed')
+  setupSlider('#frmWaveLength', 'waveLength')
 
   function setupSlider(id: string, property: keyof WritableProps) {
     const slider = document.querySelector<HTMLFormElement>(id)!;

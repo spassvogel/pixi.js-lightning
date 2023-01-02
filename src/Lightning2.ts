@@ -21,12 +21,16 @@ class Lightning2 extends Graphics {
   private _amplitude = 0.02;
   private _speed: number = 1;
   private _smoothSpeed: number = 0.1;
+  private _childrenProbability: number = 0.025;
+  private _childrenProbabilityDecay: number = 0;
 
   private _start = new Point(50, 200);
   private _end = new Point(900, 200);
 
   public alphaFadeType: LightningFadeType = LightningFadeType.GENERATION;
-
+  public waveLength = 0.5;
+  public waveLengthDecay = 0.75; // decay rate of wavelength. the closer to end the smaller the wavelength
+                                // 1 = full wavelength decay, 0 = no decay
 
   constructor(color: number = 0xffffff, thicknessStart: number = 6, generation: number = 0) {
     super();
@@ -49,9 +53,6 @@ class Lightning2 extends Graphics {
   }
 
   private init() {
-    // this.holder.lineTo(this.end.x, this.end.y);
-
-    // this.holder.set = 'Lightning holder';
     this.addChild(this.holder);
     // this.update()
   }
@@ -61,7 +62,6 @@ class Lightning2 extends Graphics {
     // this._smoothIncrement += this.smoothSpeed / 40;
     // console.log(`increment`, this._increment);
     this.draw();
-    // this.draw()
   }
 
   // * @param {number} [options.alpha=1] - alpha of the line to draw, will update the objects stored style
@@ -69,20 +69,14 @@ class Lightning2 extends Graphics {
   // *        WebGL only.
   // * @param {boolean} [options.native=false] - If true the lines will be draw using LINES instead of TRIANGLE_STRIP
   // * @param {PIXI.LINE_CAP}[options.cap=PIXI.LINE_CAP.BUTT] - line cap style
-
-
   public draw(): void {
     this.clear();
-
     const angle = Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
 
     let prevX = this.start.x;
     let prevY = this.start.y;
 
-    const segmentLength = this.length / (this.steps - 1);
-
     this.moveTo(prevX, prevY)
-    // console.log(`segmentLength`,s segmentLength);
     const dx = this.end.x - this.start.x;
     const dy = this.end.y - this.start.y;
 
@@ -93,6 +87,7 @@ class Lightning2 extends Graphics {
       return this._smoothNoise(i, this._increment)
     })
     smoothNoise = smooth(rough, 3);
+
     for (let i: number = 0; i < this.steps - 1; i++) {
       const noise = this._noise(i, this._increment);
 
@@ -103,15 +98,12 @@ class Lightning2 extends Graphics {
       if (this.alphaFadeType == LightningFadeType.TIP_TO_END) {
         // alpha = -this._minThickness * ((this.steps - i) / this.steps) + this._minThickness;
       }
-      // console.log(i, alpha)
-      // console.log(currentPosition, ((this.steps - i) / this.steps))
       this.lineStyle({
         width,
         color,
         alpha,
         cap: LINE_CAP.ROUND
       });
-
 
       const targetX = this.start.x + dx / (this.steps - 1) * (i + 1);
       const targetY = this.start.y + dy / (this.steps - 1) * (i + 1);
@@ -125,32 +117,17 @@ class Lightning2 extends Graphics {
 
         let smoothX = 0;
         let smoothY = 0;
-        const smoothOffset = smoothNoise[i] * (this.length ) * (1 - this.smooth)
+        const decayModifier = i / this.steps * (this.waveLengthDecay) * (this.length * this.waveLength)
+        const smoothOffset = smoothNoise[i] * ((this.length * this.waveLength) -decayModifier ) * (1 - this.smooth)
         smoothX = Math.sin(angle) * smoothOffset
         smoothY = Math.cos(angle) * smoothOffset
-// console.log(`smoothOffset`, smoothOffset);
         // targetWithOffsetX = targetX + offsetX;// * (1 - this.smooth);
         // targetWithOffsetY = targetY - offsetY; // * (1 - this.smooth);
         targetWithOffsetX = targetX + offsetX + smoothX;// * (1 - this.smooth);
         targetWithOffsetY = targetY - offsetY - smoothY; // * (1 - this.smooth);
       }
       this.lineTo(targetWithOffsetX, targetWithOffsetY);
-
-      // const targetX = prevX + Math.cos(angle2) * segmentLength ;
-      // const targetY = prevY + Math.sin(angle2) * segmentLength;
-      // console.log(`from ${prevX}, ${prevY} to ${targetX}, ${targetY}`);
-      // prevX = targetX;
-      // prevY = targetY;
     }
-    // this.lineTo(this.end.x, this.end.y);
-
-// begin a green fill..
-    /*this.holder.beginFill(0x00FF00);*/
-    // this.lineStyle(5, 0xFF0000);
-    // draw a triangle using lines
-    // this.moveTo(200,200);
-    // this.lineTo(50, 100);
-
   }
 
   private updateAlphaMap() {
@@ -274,6 +251,33 @@ class Lightning2 extends Graphics {
 
   public get smooth() {
     return this._smooth;
+  }
+
+  public set childrenProbability(arg: number) {
+    if (arg > 1) {
+      arg = 1
+    } else if (arg < 0) {
+      arg = 0;
+    }
+    this._childrenProbability = arg;
+  }
+
+  public get childrenProbability() {
+    return this._childrenProbability;
+  }
+
+  public set childrenProbabilityDecay(arg: number) {
+    if (arg > 1) {
+      arg = 1
+    }
+    else if (arg<0) {
+      arg = 0;
+    }
+    this._childrenProbabilityDecay = arg;
+  }
+
+  public get childrenProbabilityDecay() {
+    return this._childrenProbabilityDecay;
   }
 }
 
