@@ -10,6 +10,7 @@ class Lightning2 extends Graphics {
 
   private _steps = 40;
   private _color: number;
+  private _glow: GlowFilter;
   private _smooth = 0.85;
   private _generation: number;
   private _noise: NoiseFunction2D;
@@ -20,7 +21,6 @@ class Lightning2 extends Graphics {
   private _thicknessEnd: number;
   private _amplitude = 0.02;
   private _speed: number = 1;
-  private _smoothSpeed: number = 0.1;
   private _childrenProbability: number = 0.025;
   private _childrenProbabilityDecay: number = 0;
   private _childrenMaxCount: number = 4;
@@ -52,8 +52,9 @@ class Lightning2 extends Graphics {
     // this.thicknessFadeType = LightningFadeType.NONE;
     this._generation = generation;
     if (generation == 0) {
+      this._glow = new GlowFilter({ distance: 15, outerStrength: 3, color })
       this.filters = [
-        new GlowFilter({ distance: 15, outerStrength: 3, color: 0x0000ff })
+        this._glow
       ]
       this.init();
     }
@@ -78,12 +79,7 @@ class Lightning2 extends Graphics {
     this.draw();
   }
 
-  // * @param {number} [options.alpha=1] - alpha of the line to draw, will update the objects stored style
-  // * @param {number} [options.alignment=0.5] - alignment of the line to draw, (0 = inner, 0.5 = middle, 1 = outer).
-  // *        WebGL only.
-  // * @param {boolean} [options.native=false] - If true the lines will be draw using LINES instead of TRIANGLE_STRIP
-  // * @param {PIXI.LINE_CAP}[options.cap=PIXI.LINE_CAP.BUTT] - line cap style
-  public draw(): void {
+  public draw() {
     this.clear();
     const angle = Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
 
@@ -116,7 +112,7 @@ class Lightning2 extends Graphics {
         width,
         color,
         alpha,
-        cap: LINE_CAP.ROUND
+        cap: LINE_CAP.ROUND,
       });
 
       const targetX = this.start.x + dx / (this.steps - 1) * (i + 1);
@@ -220,6 +216,11 @@ class Lightning2 extends Graphics {
     }
   }
 
+  public set color(value: number) {
+    this._color = value;
+    this._glow.color = value
+  }
+
   public get color(): number {
     return this._color;
   }
@@ -254,7 +255,7 @@ class Lightning2 extends Graphics {
     return this._steps;
   }
 
-  public get length(): number {
+  public get length() {
     const dX = this.end.x - this.start.x;
     const dY = this.end.y - this.start.y;
     return Math.sqrt(dX * dX + dY * dY);
@@ -265,7 +266,7 @@ class Lightning2 extends Graphics {
     this._thicknessStart = arg;
   }
 
-  public get thicknessStart(): number {
+  public get thicknessStart() {
     return this._thicknessStart;
   }
 
@@ -293,20 +294,8 @@ class Lightning2 extends Graphics {
     // })
   }
 
-  public get speed(): number {
+  public get speed() {
     return this._speed;
-  }
-
-  // Sets the speed of the smoothed wave
-  public set smoothSpeed(arg: number) {
-    this._smoothSpeed = arg;
-    // this.childrenArray.forEach((o) => {
-    //   o.instance.speed = arg;
-    // })
-  }
-
-  public get smoothSpeed(): number {
-    return this._smoothSpeed;
   }
 
   // Sets a value for smoothness. 1 = smooth, 0 is rough
