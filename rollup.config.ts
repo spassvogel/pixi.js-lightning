@@ -6,15 +6,19 @@ import serve from 'rollup-plugin-serve';
 import typescript from '@rollup/plugin-typescript';
 import watch from "rollup-plugin-watch";
 
+const sourcemapEnabled = true
 const config: RollupOptions = {
   input: 'src/main.ts',
   output: {
     file: 'build/bundle.js',
+    sourcemap: sourcemapEnabled,
     // format: 'commonjs'
     format: 'iife'
   },
   plugins: [
-    typescript(),
+    typescript({
+      sourceMap: sourcemapEnabled,
+    }),
     copy({
       targets: [
         { src: 'public/**', dest: 'build' },
@@ -30,6 +34,5 @@ const config: RollupOptions = {
     }),
     watch({ dir: "public" })
   ]
-  // sourceMap: 'inline',
 }
 export default config;
