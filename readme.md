@@ -1,0 +1,1 @@
+https://github.com/davidfig/pixi-viewport/blob/master/package.json

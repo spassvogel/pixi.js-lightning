@@ -23,10 +23,18 @@ class Lightning2 extends Graphics {
   private _smoothSpeed: number = 0.1;
   private _childrenProbability: number = 0.025;
   private _childrenProbabilityDecay: number = 0;
-
+  private _childrenMaxCount: number = 4;
+  private _childrenMaxCountDecay: number = .5;
+  private _childrenMaxGenerations = 1;
+  private _childrenLengthDecay: number = 0.5;
+  private _childrenAngleVariation: number = 60;
   private _start = new Point(50, 200);
   private _end = new Point(900, 200);
 
+  public startStep: number;
+  public endStep: number;
+  public parentInstance: Lightning2;
+  public childAngle = 0;
   public alphaFadeType: LightningFadeType = LightningFadeType.GENERATION;
   public waveLength = 0.5;
   public waveLengthDecay = 0.75; // decay rate of wavelength. the closer to end the smaller the wavelength
@@ -57,10 +65,16 @@ class Lightning2 extends Graphics {
     // this.update()
   }
 
-  public update(): void {
+  public update() {
     this._increment += this.speed / 40;
     // this._smoothIncrement += this.smoothSpeed / 40;
     // console.log(`increment`, this._increment);
+
+    const generateChildRandom = Math.random();
+    if (generateChildRandom < this._childrenProbability) {
+      this.generateChild();
+    }
+
     this.draw();
   }
 
@@ -151,6 +165,59 @@ class Lightning2 extends Graphics {
     //   const sprite = Sprite.from(texture);
     //   this.mask = sprite
     // }
+  }
+
+  private generateChild(n: number = 1, recursive:  boolean = false): void {
+    // if (generation < _childrenMaxGenerations && this.numChildren < this._childrenMaxCount) {
+      if (this._generation < this.childrenMaxGenerations && this.numChildren < this.childrenMaxCount) {
+        const targetChildSteps = this.steps * this._childrenLengthDecay;
+        if (targetChildSteps >= 2) {
+        console.log('generate', targetChildSteps)
+        for(let i: number = 0; i < n; i++) {
+          const startStep: number = Math.random() * this.steps;
+          let endStep: number = Math.random() * this.steps;
+          while( endStep == startStep) endStep = Math.random() * this.steps;
+          const childAngle: number = Math.random() * this._childrenAngleVariation - this._childrenAngleVariation / 2;
+
+          const child: Lightning2 = new Lightning2(this.color, this.thicknessStart, this._generation + 1);
+
+          child.parentInstance = this;
+          // child.lifeSpan = Math.random()* (this.childrenLifeSpanMax - this.childrenLifeSpanMin) + this.childrenLifeSpanMin;
+          // child.positionL = 1 - startStep / this.steps;
+          // child.absolutePosition = this.absolutePosition * child.positionL;
+          child.alphaFadeType = this.alphaFadeType;
+          // child.thicknessFadeType = this.thicknessFadeType;
+
+          if (this.alphaFadeType == LightningFadeType.GENERATION) {
+            child.alpha = 1 - (1 / (this.childrenMaxGenerations + 1)) * child.generation;
+          }
+          // if (this.thicknessFadeType == LightningFadeType.GENERATION) child.thickness = this.thickness - (this.thickness/(this.childrenMaxGenerations+1)) * child.generation;
+          child.childrenMaxGenerations = this.childrenMaxGenerations;
+          child.childrenMaxCount = this.childrenMaxCount * (1 - this.childrenMaxCountDecay);
+          child.childrenProbability = this.childrenProbability * (1 - this.childrenProbabilityDecay);
+          child.childrenProbabilityDecay = this.childrenProbabilityDecay;
+          child.childrenLengthDecay = this.childrenLengthDecay;
+          // child.childrenDetachedEnd = this.childrenDetachedEnd;
+
+          child.waveLength = this.waveLength;
+          child.amplitude = this.amplitude;
+          child.speed = this.speed;
+
+          child.init();
+
+          child.endStep = endStep;
+          child.startStep = startStep;
+          child.childAngle = childAngle;
+          child.steps = this.steps * (1 - this.childrenLengthDecay);
+
+          this.addChild(child);
+
+          if (recursive) {
+            child.generateChild(n, true);
+          }
+        }
+      }
+    }
   }
 
   public get color(): number {
@@ -278,6 +345,77 @@ class Lightning2 extends Graphics {
 
   public get childrenProbabilityDecay() {
     return this._childrenProbabilityDecay;
+  }
+
+  /**
+ * Getter/Setter for the 'childrenMaxGenerations' property
+ */
+  public set childrenMaxGenerations(value: number) {
+    this._childrenMaxGenerations = value;
+    // validateChildren();
+  }
+
+  public get childrenMaxGenerations() {
+    return this._childrenMaxGenerations;
+  }
+
+  public set childrenLengthDecay(arg: number) {
+    if (arg > 1 ) { 
+      arg = 1;
+    } else if (arg < 0) {
+      arg = 0;
+    } 
+    this._childrenLengthDecay = arg;
+  }
+
+  public get childrenLengthDecay() {
+    return this._childrenLengthDecay;
+  }
+  
+  public set childrenMaxCount(arg: number) {
+    this._childrenMaxCount = arg;
+    // this.killSurplus();
+  }
+
+  public get childrenMaxCount(): number {
+    return this._childrenMaxCount;
+  }
+
+  public set childrenMaxCountDecay(arg: number) {
+    if (arg > 1) { 
+      arg = 1;
+     } else if (arg <0 ) {
+      arg = 0;
+     }
+    this._childrenMaxCountDecay = arg;
+  }
+
+  public get childrenMaxCountDecay() {
+    return this._childrenMaxCountDecay;
+  }
+
+  public set childrenAngleVariation(arg: number) {
+    this._childrenAngleVariation = arg;
+    this.childLightnings.forEach((l) => {
+      l.childAngle = Math.random() * arg - arg / 2;
+      l.childrenAngleVariation = arg;
+    })
+  }
+
+  public get childrenAngleVariation() {
+    return this._childrenAngleVariation;
+  }
+
+  public get generation() {
+    return this._generation;
+  }
+
+  private get numChildren() {
+    return this.children.length
+  }
+
+  private get childLightnings() {
+    return this.children as Lightning2[]
   }
 }
 
