@@ -10,6 +10,7 @@ class Lightning2 extends Graphics {
 
   private _steps = 40;
   private _color: number;
+  private _glow: GlowFilter;
   private _smooth = 0.85;
   private _generation: number;
   private _noise: NoiseFunction2D;
@@ -44,8 +45,9 @@ class Lightning2 extends Graphics {
     // this.thicknessFadeType = LightningFadeType.NONE;
     this._generation = generation;
     if (generation == 0) {
+      this._glow = new GlowFilter({ distance: 15, outerStrength: 3, color })
       this.filters = [
-        new GlowFilter({ distance: 15, outerStrength: 3, color: 0x0000ff })
+        this._glow
       ]
       this.init();
     }
@@ -102,7 +104,7 @@ class Lightning2 extends Graphics {
         width,
         color,
         alpha,
-        cap: LINE_CAP.ROUND
+        cap: LINE_CAP.ROUND,
       });
 
       const targetX = this.start.x + dx / (this.steps - 1) * (i + 1);
@@ -151,6 +153,11 @@ class Lightning2 extends Graphics {
     //   const sprite = Sprite.from(texture);
     //   this.mask = sprite
     // }
+  }
+
+  public set color(value: number) {
+    this._color = value;
+    this._glow.color = value
   }
 
   public get color(): number {

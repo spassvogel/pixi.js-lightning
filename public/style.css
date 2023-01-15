@@ -26,12 +26,14 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.control-slider label::after {
+.control-slider label::after,
+.control-color label::after {
   content: "(" attr(data-value) ")";
   float: right;
 }
 
-.control-slider input {
+.control-slider input,
+.control-color input {
   width: 100%;
 }
 

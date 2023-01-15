@@ -109,7 +109,8 @@ app.ticker.add(delta => {
   });
   // lightning.update();
   type WritableProps = Pick<Lightning2,
-    'amplitude'
+    'color'
+  | 'amplitude'
   | 'steps'
   | 'thicknessStart'
   | 'thicknessEnd'
@@ -128,6 +129,7 @@ app.ticker.add(delta => {
   setupSlider('#frmSmooth', 'smooth')
   setupSlider('#frmSmoothSpeed', 'smoothSpeed')
   setupSlider('#frmWaveLength', 'waveLength')
+  setupColor('#frmColor', 'color')
 
   function setupSlider(id: string, property: keyof WritableProps) {
     const slider = document.querySelector<HTMLFormElement>(id)!;
@@ -135,6 +137,17 @@ app.ticker.add(delta => {
     slider.labels[0].dataset.value = slider.value;
     slider.addEventListener('input', () => {
       lightning[property] = Number(slider.value);
+      slider.labels[0].dataset.value = slider.value;
+    })
+  }
+
+  function setupColor(id: string, property: keyof WritableProps) {
+    const slider = document.querySelector<HTMLFormElement>(id)!;
+    slider.value = `#${lightning[property].toString(16)}`;
+    slider.labels[0].dataset.value = slider.value;
+    slider.addEventListener('input', () => {
+      const asInt = parseInt((slider.value).replace("#", ""), 16)
+      lightning[property] = asInt;
       slider.labels[0].dataset.value = slider.value;
     })
   }
