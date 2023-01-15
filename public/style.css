@@ -30,6 +30,7 @@ body {
 .control-color label::after {
   content: "(" attr(data-value) ")";
   float: right;
+  font-family: monospace;
 }
 
 .control-slider input,

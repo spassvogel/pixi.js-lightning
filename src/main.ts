@@ -107,7 +107,7 @@ app.ticker.add(delta => {
     // startPoint.x = lightning.startX;
     // startPoint.y = lightning.startY;
   });
-  // lightning.update();
+
   type WritableProps = Pick<Lightning2,
     'color'
   | 'amplitude'

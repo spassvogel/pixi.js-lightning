@@ -58,19 +58,14 @@ class Lightning2 extends Graphics {
     // this.update()
   }
 
-  public update(): void {
+  public update() {
     this._increment += this.speed / 40;
     // this._smoothIncrement += this.smoothSpeed / 40;
     // console.log(`increment`, this._increment);
     this.draw();
   }
 
-  // * @param {number} [options.alpha=1] - alpha of the line to draw, will update the objects stored style
-  // * @param {number} [options.alignment=0.5] - alignment of the line to draw, (0 = inner, 0.5 = middle, 1 = outer).
-  // *        WebGL only.
-  // * @param {boolean} [options.native=false] - If true the lines will be draw using LINES instead of TRIANGLE_STRIP
-  // * @param {PIXI.LINE_CAP}[options.cap=PIXI.LINE_CAP.BUTT] - line cap style
-  public draw(): void {
+  public draw() {
     this.clear();
     const angle = Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
 
@@ -193,7 +188,7 @@ class Lightning2 extends Graphics {
     return this._steps;
   }
 
-  public get length(): number {
+  public get length() {
     const dX = this.end.x - this.start.x;
     const dY = this.end.y - this.start.y;
     return Math.sqrt(dX * dX + dY * dY);
@@ -204,7 +199,7 @@ class Lightning2 extends Graphics {
     this._thicknessStart = arg;
   }
 
-  public get thicknessStart(): number {
+  public get thicknessStart() {
     return this._thicknessStart;
   }
 
@@ -232,7 +227,7 @@ class Lightning2 extends Graphics {
     // })
   }
 
-  public get speed(): number {
+  public get speed() {
     return this._speed;
   }
 
