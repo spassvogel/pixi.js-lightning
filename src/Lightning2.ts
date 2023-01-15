@@ -21,7 +21,6 @@ class Lightning2 extends Graphics {
   private _thicknessEnd: number;
   private _amplitude = 0.02;
   private _speed: number = 1;
-  private _smoothSpeed: number = 0.1;
   private _childrenProbability: number = 0.025;
   private _childrenProbabilityDecay: number = 0;
 
@@ -235,18 +234,6 @@ class Lightning2 extends Graphics {
 
   public get speed(): number {
     return this._speed;
-  }
-
-  // Sets the speed of the smoothed wave
-  public set smoothSpeed(arg: number) {
-    this._smoothSpeed = arg;
-    // this.childrenArray.forEach((o) => {
-    //   o.instance.speed = arg;
-    // })
-  }
-
-  public get smoothSpeed(): number {
-    return this._smoothSpeed;
   }
 
   // Sets a value for smoothness. 1 = smooth, 0 is rough

@@ -116,7 +116,6 @@ app.ticker.add(delta => {
   | 'thicknessEnd'
   | 'speed'
   | 'smooth'
-  | 'smoothSpeed'
   | 'waveLength'
   >
 
@@ -127,7 +126,6 @@ app.ticker.add(delta => {
   setupSlider('#frmThicknessEnd', 'thicknessEnd')
   setupSlider('#frmSpeed', 'speed')
   setupSlider('#frmSmooth', 'smooth')
-  setupSlider('#frmSmoothSpeed', 'smoothSpeed')
   setupSlider('#frmWaveLength', 'waveLength')
   setupColor('#frmColor', 'color')
 
